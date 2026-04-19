@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Election Results 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #f9fafb; min-height: 100vh; padding: 40px 16px 60px; }
+        .page { max-width: 860px; margin: 0 auto; }
+        .back { display: inline-flex; align-items: center; gap: 6px; color: #6b7280; font-size: 14px; text-decoration: none; margin-bottom: 28px; }
+        .back:hover { color: #111827; }
+        .page-header { text-align: center; margin-bottom: 36px; }
+        .page-header h1 { font-size: 32px; font-weight: 700; color: #111827; margin-bottom: 6px; }
+        .page-header p { font-size: 16px; color: #6b7280; }
+        .lookup-card { background: white; border-radius: 18px; padding: 28px 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin-bottom: 28px; }
+        .lookup-card h2 { font-size: 17px; font-weight: 700; color: #111827; margin-bottom: 6px; }
+        .lookup-card p { font-size: 14px; color: #6b7280; margin-bottom: 20px; }
+        .lookup-row { display: flex; gap: 10px; }
+        .lookup-input { flex: 1; padding: 12px 16px; border: 1.5px solid #d1d5db; border-radius: 10px; font-size: 15px; font-family: 'DM Mono', monospace; background: #fafbfc; transition: border-color 0.2s; text-transform: uppercase; }
+        .lookup-input:focus { outline: none; border-color: #4f46e5; background: white; }
+        .lookup-btn { padding: 12px 22px; background: #4f46e5; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap; }
+        .lookup-btn:hover { background: #3730a3; }
+        .error-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 14px 18px; color: #dc2626; font-size: 14px; margin-top: 16px; }
+        .verified-card { background: #f0fdf4; border: 2px solid #86efac; border-radius: 16px; padding: 24px 28px; margin-top: 20px; }
+        .verified-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+        .verified-badge { background: #22c55e; color: white; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+        .verified-header h3 { font-size: 16px; font-weight: 700; color: #15803d; }
+        .v-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .v-item { background: white; border-radius: 10px; padding: 12px 16px; }
+        .v-label { font-size: 11px; color: #9ca3af; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .v-value { font-size: 14px; font-weight: 600; color: #111827; }
+        .party-badge { display: inline-block; background: #dcfce7; color: #15803d; padding: 5px 12px; border-radius: 20px; font-size: 15px; font-weight: 700; }
+        .forensics-section { background: #f8fafc; border-top: 1px solid #d1fae5; margin-top: 16px; padding: 16px 0 0; }
+        .forensics-title { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+        .f-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .f-item { background: white; border-radius: 8px; padding: 10px 12px; border: 1px solid #e5e7eb; }
+        .f-label { font-size: 10px; color: #9ca3af; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+        .f-value { font-size: 12px; font-weight: 600; color: #374151; font-family: 'DM Mono', monospace; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .card { background: white; border-radius: 18px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        .card h2 { font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 18px; }
+        .chart-wrap { height: 260px; display: flex; align-items: center; justify-content: center; }
+        .total-pill { display: inline-block; background: #ede9fe; color: #5b21b6; font-size: 13px; font-weight: 600; padding: 4px 14px; border-radius: 20px; margin-bottom: 12px; }
+        .top3-table { width: 100%; border-collapse: collapse; }
+        .top3-table th { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; text-align: left; padding: 0 0 12px; }
+        .top3-table td { padding: 12px 0; border-top: 1px solid #f3f4f6; vertical-align: middle; }
+        .rank-badge { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+        .party-name-cell { font-size: 15px; font-weight: 700; color: #111827; }
+        .party-full-cell { font-size: 12px; color: #6b7280; margin-top: 2px; }
+        .votes-cell { font-size: 18px; font-weight: 700; color: #111827; font-family: 'DM Mono', monospace; text-align: right; }
+        .pct-cell { font-size: 13px; color: #6b7280; text-align: right; }
+        .progress-bar { height: 4px; background: #e5e7eb; border-radius: 2px; margin-top: 6px; }
+        .progress-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg,#4f46e5,#7c3aed); }
+        .no-votes { text-align: center; padding: 40px; color: #9ca3af; font-size: 15px; }
+        @media (max-width: 600px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .v-grid { grid-template-columns: 1fr; }
+            .f-grid { grid-template-columns: 1fr 1fr; }
+            .lookup-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <a href="/" class="back">← Back to Home</a>
+
+    <div class="page-header">
+        <h1 style="display:flex;align-items:center;gap:10px;"><img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" style="width:34px;height:34px;" alt="results"> Election Results 2026</h1>
+        <p>Verify your vote and view live voting statistics</p>
+    </div>
+
+    <!-- Receipt lookup -->
+    <div class="lookup-card">
+        <h2 style="display:flex;align-items:center;gap:8px;"><img src="https://cdn-icons-png.flaticon.com/512/2257/2257295.png" style="width:24px;height:24px;" alt="receipt"> Verify Your Vote</h2>
+        <p>Enter your digital receipt number to confirm your vote was recorded correctly. Receipts are valid for 24 hours after voting.</p>
+
+        <form method="POST" action="{{ url_for('results') }}">
+            <div class="lookup-row">
+                <input class="lookup-input" type="text" name="receipt_number"
+                       placeholder="RCP-XXXXXXXXXX"
+                       value="{{ request.form.get('receipt_number', '') }}">
+                <button type="submit" class="lookup-btn" style="display:inline-flex;align-items:center;gap:6px;"><img src="https://cdn-icons-png.flaticon.com/512/2257/2257295.png" style="width:16px;height:16px;" alt="verify"> Verify</button>
+            </div>
+        </form>
+
+        {% if error %}
+        <div class="error-box" style="display:flex;align-items:center;gap:8px;"><img src="https://cdn-icons-png.flaticon.com/512/564/564619.png" style="width:16px;height:16px;" alt="warning"> {{ error }}</div>
+        {% endif %}
+
+        {% if receipt_data %}
+        <div class="verified-card">
+            <div class="verified-header">
+                <span class="verified-badge">✓ VERIFIED</span>
+                <h3>Vote confirmed on record</h3>
+            </div>
+
+            <div class="v-grid">
+                <div class="v-item">
+                    <div class="v-label">Voter Name</div>
+                    <div class="v-value">{{ receipt_data.full_name }}</div>
+                </div>
+                <div class="v-item">
+                    <div class="v-label">Voter ID</div>
+                    <div class="v-value" style="font-family:'DM Mono',monospace;">{{ receipt_data.voter_number }}</div>
+                </div>
+                <div class="v-item">
+                    <div class="v-label">Party Voted</div>
+                    <div class="v-value"><span class="party-badge">{{ receipt_data.party }}</span></div>
+                </div>
+                <div class="v-item">
+                    <div class="v-label">Full Party Name</div>
+                    <div class="v-value">{{ receipt_data.party_full }}</div>
+                </div>
+                <div class="v-item">
+                    <div class="v-label">Date</div>
+                    <div class="v-value">{{ receipt_data.voted_at.strftime('%d %b %Y') }}</div>
+                </div>
+                <div class="v-item">
+                    <div class="v-label">Time</div>
+                    <div class="v-value">{{ receipt_data.voted_at.strftime('%I:%M %p') }}</div>
+                </div>
+            </div>
+
+            <!-- Forensic details -->
+            <div class="forensics-section">
+                <div class="forensics-title">🔬 Forensic Record</div>
+                <div class="f-grid">
+                    <div class="f-item">
+                        <div class="f-label">Receipt ID</div>
+                        <div class="f-value">{{ receipt_data.receipt_number }}</div>
+                    </div>
+                    <div class="f-item">
+                        <div class="f-label">Unix Timestamp</div>
+                        <div class="f-value">{{ receipt_data.voted_at.strftime('%Y%m%d%H%M%S') }}</div>
+                    </div>
+                    <div class="f-item">
+                        <div class="f-label">Election</div>
+                        <div class="f-value">IND-ELECT-2026</div>
+                    </div>
+                    <div class="f-item">
+                        <div class="f-label">Expires At</div>
+                        <div class="f-value">{{ receipt_data.expires_at.strftime('%d/%m %H:%M') }}</div>
+                    </div>
+                    <div class="f-item">
+                        <div class="f-label">Status</div>
+                        <div class="f-value" style="color:#16a34a;">VALID ✓</div>
+                    </div>
+                    <div class="f-item">
+                        <div class="f-label">Integrity</div>
+                        <div class="f-value" style="color:#16a34a;">INTACT ✓</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Live stats -->
+    {% if total_votes > 0 %}
+    <div class="stats-grid">
+
+        <div class="card">
+            <div class="total-pill">{{ total_votes }} total votes cast</div>
+            <h2>Vote Share</h2>
+            <div class="chart-wrap">
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🏆 Top 3 Leading Parties</h2>
+            <table class="top3-table">
+                <thead>
+                    <tr>
+                        <th style="width:36px;">#</th>
+                        <th>Party</th>
+                        <th style="text-align:right;">Votes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in top3 %}
+                    {% set i = loop.index0 %}
+                    <tr>
+                        <td><div class="rank-badge">{{ ['🥇','🥈','🥉'][i] }}</div></td>
+                        <td>
+                            <div class="party-name-cell">{{ p.party }}</div>
+                            <div class="party-full-cell">{{ p.party_full }}</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width:{{ ((p.cnt / total_votes) * 100)|round(1) }}%"></div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="votes-cell">{{ p.cnt }}</div>
+                            <div class="pct-cell">{{ ((p.cnt / total_votes) * 100)|round(1) }}%</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    {% else %}
+    <div class="card">
+        <div class="no-votes" style="display:flex;align-items:center;justify-content:center;gap:8px;"><img src="https://cdn-icons-png.flaticon.com/512/3201/3201299.png" style="width:20px;height:20px;" alt="vote"> No votes have been cast yet. Results will appear here once voting begins!</div>
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+    {% if total_votes > 0 %}
+    const labels = {{ party_rows | map(attribute='party') | list | tojson }};
+    const counts = {{ party_rows | map(attribute='cnt')   | list | tojson }};
+    const colors = ['#f97316','#38bdf8','#1e3a8a','#22c55e','#dc2626',
+                    '#ef4444','#2563eb','#0d9488','#8b5cf6','#f59e0b','#6b7280'];
+
+    new Chart(document.getElementById('pieChart'), {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: counts,
+                backgroundColor: colors.slice(0, labels.length),
+                borderWidth: 2, borderColor: '#fff', hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right', labels: { color: '#374151', font: { family: 'Inter', size: 11 }, padding: 10, usePointStyle: true } }
+            }
+        }
+    });
+    {% endif %}
+</script>
+</body>
+</html>

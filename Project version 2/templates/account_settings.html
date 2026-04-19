@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* Matrix background */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #05050a;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .jp-matrix {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            grid-auto-rows: 40px;
+            font-size: 22px;
+            color: rgba(0, 150, 255, 0.25);
+            font-family: "Courier New", Courier, monospace;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .jp-matrix span {
+            text-align: center;
+            text-shadow: 0 0 5px rgba(0,150,255,0.4);
+            user-select: none;
+            line-height: 1;
+            transition: color 0.5s, text-shadow 0.5s;
+        }
+        .jp-matrix span:nth-child(19n+2)  { animation: smooth-pulse 3.5s ease-in-out infinite 0.2s; }
+        .jp-matrix span:nth-child(29n+1)  { animation: smooth-pulse 4.1s ease-in-out infinite 0.7s; }
+        .jp-matrix span:nth-child(11n)    { color: rgba(100,200,255,0.5); animation: smooth-pulse 2.9s ease-in-out infinite 1.1s; }
+        .jp-matrix span:nth-child(37n+10) { animation: smooth-pulse 5.3s ease-in-out infinite 1.5s; }
+        .jp-matrix span:nth-child(41n+1)  { animation: smooth-pulse 3.9s ease-in-out infinite 0.4s; }
+        .jp-matrix span:nth-child(17n+9)  { animation: smooth-pulse 2.8s ease-in-out infinite 0.9s; }
+        .jp-matrix span:nth-child(23n+18) { animation: smooth-pulse 4.3s ease-in-out infinite 1.3s; }
+        .jp-matrix span:nth-child(31n+4)  { animation: smooth-pulse 5.6s ease-in-out infinite 0.1s; }
+        @keyframes smooth-pulse {
+            0%,100% { color: rgba(0,150,255,0.25); text-shadow: 0 0 5px rgba(0,150,255,0.4); }
+            30%      { color: rgba(100,200,255,0.9); text-shadow: 0 0 10px rgba(100,200,255,1), 0 0 15px rgba(100,200,255,1); }
+            50%      { color: rgba(0,255,200,0.8); text-shadow: 0 0 10px rgba(0,255,200,1), 0 0 15px rgba(0,255,200,1); }
+            70%      { color: rgba(180,100,255,0.9); text-shadow: 0 0 10px rgba(180,100,255,1), 0 0 20px rgba(180,100,255,1); }
+        }
+
+        /* Main layout */
+        .page {
+            position: relative;
+            z-index: 1;
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 40px 20px 60px;
+        }
+
+        /* Back link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(0,200,255,0.8);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 32px;
+            letter-spacing: 0.5px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: #00ffff; }
+        .back-link svg { width: 16px; height: 16px; }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+        .avatar-ring {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(0,150,255,0.3), rgba(100,0,255,0.3));
+            border: 2px solid rgba(0,200,255,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 30px;
+            font-weight: 700;
+            color: #00ffff;
+            font-family: 'DM Mono', monospace;
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+        .header p { font-size: 13px; color: rgba(255,255,255,0.45); }
+
+        /* Flash */
+        .flash {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .flash.success { background: rgba(0,255,150,0.12); border: 1px solid rgba(0,255,150,0.35); color: #00ff96; }
+        .flash.danger  { background: rgba(255,60,60,0.12);  border: 1px solid rgba(255,60,60,0.35);  color: #ff6b6b; }
+        .flash.info    { background: rgba(0,150,255,0.12);  border: 1px solid rgba(0,150,255,0.35);  color: #66ccff; }
+
+        /* Settings card */
+        .settings-card {
+            background: rgba(10,12,25,0.85);
+            border: 1px solid rgba(0,200,255,0.2);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(12px);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(0,200,255,0.12);
+        }
+        .card-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: rgba(0,150,255,0.15);
+            border: 1px solid rgba(0,200,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .card-icon svg { width: 20px; height: 20px; }
+        .card-title { font-size: 15px; font-weight: 700; color: #ffffff; }
+        .card-subtitle { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+        /* Form elements */
+        .form-row { margin-bottom: 18px; }
+        .form-row label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: rgba(0,200,255,0.7);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .form-row input, .form-row select {
+            width: 100%;
+            padding: 11px 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(0,200,255,0.2);
+            border-radius: 10px;
+            font-size: 14px;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-row input:focus, .form-row select:focus {
+            outline: none;
+            border-color: rgba(0,200,255,0.6);
+            box-shadow: 0 0 0 3px rgba(0,150,255,0.12);
+        }
+        .form-row input::placeholder { color: rgba(255,255,255,0.25); }
+        .form-row select option { background: #1a2035; color: #fff; }
+        .form-row select:disabled { opacity: 0.4; cursor: not-allowed; }
+        .form-row input[readonly] {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        select option { background: #0a0c19; color: #fff; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        /* Age display */
+        .age-pill {
+            display: none;
+            margin-top: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'DM Mono', monospace;
+        }
+        .age-pill.valid   { background: rgba(0,255,150,0.1); border: 1px solid rgba(0,255,150,0.3); color: #00ff96; }
+        .age-pill.invalid { background: rgba(255,60,60,0.1);  border: 1px solid rgba(255,60,60,0.3);  color: #ff6b6b; }
+
+        /* Glow button — from Uiverse mrhyddenn style */
+        .btn-glow {
+            position: relative;
+            padding: 12px 28px;
+            border-radius: 9px;
+            border: 1px solid rgba(0,150,255,0.7);
+            font-size: 13px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: transparent;
+            color: #fff;
+            overflow: hidden;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease-in;
+            width: 100%;
+            margin-top: 8px;
+        }
+        .btn-glow:hover {
+            background: rgba(0,100,255,0.5);
+            box-shadow: 0 0 28px 5px rgba(0,142,236,0.6);
+            transition: all 0.2s ease-out;
+        }
+        .btn-glow::before {
+            content: '';
+            display: block;
+            width: 0;
+            height: 86%;
+            position: absolute;
+            top: 7%;
+            left: 0;
+            opacity: 0;
+            background: #fff;
+            box-shadow: 0 0 50px 30px #fff;
+            transform: skewX(-20deg);
+        }
+        .btn-glow:hover::before {
+            animation: shine 0.5s 0s linear;
+        }
+        @keyframes shine {
+            from { opacity: 0; left: 0; }
+            50%  { opacity: 0.4; }
+            to   { opacity: 0; left: 100%; }
+        }
+        .btn-glow:active { box-shadow: none; }
+        .btn-glow.danger {
+            border-color: rgba(255,60,60,0.7);
+            color: #ff9999;
+        }
+        .btn-glow.danger:hover {
+            background: rgba(180,0,0,0.4);
+            box-shadow: 0 0 28px 5px rgba(255,60,60,0.4);
+        }
+
+        /* Verify gate */
+        .verify-gate {
+            text-align: center;
+            padding: 32px 20px;
+        }
+        .verify-gate .lock-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(0,150,255,0.12);
+            border: 1px solid rgba(0,200,255,0.25);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+        .verify-gate p {
+            font-size: 14px;
+            color: rgba(255,255,255,0.55);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .verify-gate h3 { font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+
+        /* Info row */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-size: 13px;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: rgba(255,255,255,0.4); font-weight: 500; }
+        .info-value { color: #fff; font-family: 'DM Mono', monospace; font-size: 12px; }
+
+        /* OTP inputs */
+        .otp-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .otp-digit {
+            width: 46px;
+            height: 50px;
+            font-size: 20px;
+            font-weight: 700;
+            text-align: center;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(0,200,255,0.25);
+            border-radius: 10px;
+            color: #fff;
+            font-family: 'DM Mono', monospace;
+            transition: border-color 0.2s;
+        }
+        .otp-digit:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 0 3px rgba(0,255,255,0.1);
+        }
+        #otpHidden { display: none; }
+
+        /* Section divider */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 8px 0 20px;
+        }
+        .section-divider span {
+            font-size: 11px;
+            font-weight: 700;
+            color: rgba(0,200,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            white-space: nowrap;
+        }
+        .section-divider hr {
+            flex: 1;
+            border: none;
+            border-top: 1px solid rgba(0,200,255,0.12);
+        }
+
+        /* Danger zone */
+        .danger-zone {
+            background: rgba(30,5,5,0.85);
+            border: 1px solid rgba(255,60,60,0.25);
+            border-radius: 16px;
+            padding: 28px;
+            backdrop-filter: blur(12px);
+        }
+        .danger-zone .card-icon { background: rgba(255,60,60,0.12); border-color: rgba(255,60,60,0.25); }
+    </style>
+</head>
+<body>
+
+<!-- Matrix background -->
+<div class="jp-matrix" id="matrix"></div>
+
+<div class="page">
+
+    <a href="/dashboard" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        Back to Dashboard
+    </a>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="avatar-ring" id="avatarInitial">?</div>
+        <h1 id="headerName">Account Settings</h1>
+        <p>Manage your voter profile and preferences</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+        <div class="flash {{ cat }}">{{ msg }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    {% if not verified %}
+    <!-- STEP 1: Identity verification gate -->
+    <div class="settings-card">
+        <div class="verify-gate">
+            <div class="lock-icon">
+                <!-- Lock icon SVG -->
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(0,200,255,0.8)" stroke-width="2" stroke-linecap="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+            </div>
+            <h3>Verify Your Identity</h3>
+            <p>To protect your account, please enter your password and complete OTP verification before making any changes.</p>
+
+            {% if not otp_sent %}
+            <form method="POST" action="{{ url_for('account_verify') }}">
+                <div class="form-row" style="text-align:left;">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="Enter your password" required autofocus>
+                </div>
+                <button type="submit" class="btn-glow">
+                    <!-- Key icon -->
+                    Verify Identity →
+                </button>
+            </form>
+            {% else %}
+            <p style="color:rgba(0,255,150,0.8);font-size:13px;margin-bottom:8px;">OTP sent — check your console!</p>
+            <form method="POST" action="{{ url_for('account_verify_otp') }}" id="otpForm">
+                <div class="otp-row">
+                    <input class="otp-digit" maxlength="1" inputmode="numeric">
+                    <input class="otp-digit" maxlength="1" inputmode="numeric">
+                    <input class="otp-digit" maxlength="1" inputmode="numeric">
+                    <input class="otp-digit" maxlength="1" inputmode="numeric">
+                    <input class="otp-digit" maxlength="1" inputmode="numeric">
+                    <input class="otp-digit" maxlength="1" inputmode="numeric">
+                </div>
+                <input type="text" name="otp" id="otpHidden">
+                <button type="submit" class="btn-glow" onclick="collectOtp()">Confirm OTP →</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    {% else %}
+    <!-- STEP 2: Settings (unlocked after verification) -->
+
+    <!-- Current info summary -->
+    <div class="settings-card">
+        <div class="card-header">
+            <div class="card-icon">
+                <!-- User icon -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="rgba(0,200,255,0.8)" stroke-width="2" stroke-linecap="round">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                </svg>
+            </div>
+            <div>
+                <div class="card-title">{{ user.full_name }}</div>
+                <div class="card-subtitle">Voter ID: {{ user.voter_number }}</div>
+            </div>
+        </div>
+        <div class="info-row"><span class="info-label">Email</span><span class="info-value">{{ user.email }}</span></div>
+        <div class="info-row"><span class="info-label">Phone</span><span class="info-value">{{ user.phone_number }}</span></div>
+        <div class="info-row"><span class="info-label">State</span><span class="info-value">{{ user.state or '—' }}</span></div>
+        <div class="info-row"><span class="info-label">District</span><span class="info-value">{{ user.district or '—' }}</span></div>
+        <div class="info-row"><span class="info-label">City</span><span class="info-value">{{ user.city or '—' }}</span></div>
+        <div class="info-row"><span class="info-label">Date of Birth</span><span class="info-value">{{ user.date_of_birth }}</span></div>
+    </div>
+
+    <!-- Edit personal info -->
+    <div class="settings-card">
+        <div class="card-header">
+            <div class="card-icon">
+                <!-- Edit icon (pencil) -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="rgba(0,200,255,0.8)" stroke-width="2" stroke-linecap="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+            </div>
+            <div>
+                <div class="card-title">Edit Profile</div>
+                <div class="card-subtitle">Update your personal information</div>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('account_update') }}">
+
+            <div class="form-row">
+                <label>Full Name</label>
+                <input type="text" name="full_name" value="{{ user.full_name }}" required>
+            </div>
+
+            <div class="form-row">
+                <label>Phone Number</label>
+                <input type="tel" name="phone" value="{{ user.phone_number }}" required>
+            </div>
+
+            <div class="form-row">
+                <label>Email (cannot change)</label>
+                <input type="email" value="{{ user.email }}" readonly>
+            </div>
+
+            <div class="section-divider"><hr><span>Date of Birth</span><hr></div>
+
+            <div class="form-row">
+                <label>Date of Birth</label>
+                <input type="date" name="dob" id="dobInput" value="{{ user.date_of_birth }}" required>
+                <div class="age-pill" id="agePill"></div>
+            </div>
+
+            <div class="section-divider"><hr><span>Location</span><hr></div>
+
+            <div class="form-row">
+                <label>State</label>
+                <input type="text" value="Maharashtra" readonly>
+                <input type="hidden" name="state" value="Maharashtra">
+            </div>
+            <div class="form-row">
+                <label>District</label>
+                <select name="district" id="districtSelect" required onchange="loadCities()">
+                    <option value="">— Select District —</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label>City</label>
+                <select name="city" id="citySelect" required disabled>
+                    <option value="">— Select City —</option>
+                </select>
+            </div>
+
+            <div style="background:rgba(255,200,0,0.07);border:1px solid rgba(255,200,0,0.2);border-radius:10px;padding:11px 14px;margin-bottom:18px;font-size:12px;color:rgba(255,200,0,0.85);line-height:1.6;">
+                ⚠️ Changing your city or district will delete your existing vote and receipt, and re-assign you to the new area's elections.
+            </div>
+
+            <div class="section-divider"><hr><span>Change Password</span><hr></div>
+
+            <div class="two-col">
+                <div class="form-row">
+                    <label>New Password</label>
+                    <input type="password" name="new_password" placeholder="Leave blank to keep current" minlength="6">
+                </div>
+                <div class="form-row">
+                    <label>Confirm New Password</label>
+                    <input type="password" name="confirm_password" placeholder="Repeat new password">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-glow">
+                Save Changes →
+            </button>
+        </form>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="danger-zone">
+        <div class="card-header">
+            <div class="card-icon">
+                <!-- Warning triangle -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,80,80,0.9)" stroke-width="2" stroke-linecap="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+            </div>
+            <div>
+                <div class="card-title" style="color:#ff9999;">Danger Zone</div>
+                <div class="card-subtitle" style="color:rgba(255,100,100,0.5);">Irreversible actions</div>
+            </div>
+        </div>
+
+        <div class="info-row" style="border-bottom:1px solid rgba(255,60,60,0.12);">
+            <span class="info-label">Delete account</span>
+            <span style="font-size:12px;color:rgba(255,100,100,0.6);">Permanently removes all your data</span>
+        </div>
+
+        <form method="POST" action="{{ url_for('account_delete') }}" onsubmit="return confirm('Are you absolutely sure? This cannot be undone.');">
+            <button type="submit" class="btn-glow danger" style="margin-top:18px;">
+                Delete My Account
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+    // ── Cascading Place Dropdowns (Maharashtra only) ──
+    const CURRENT_DISTRICT = {{ user.district | tojson if verified and user and user.district else '""' }};
+    const CURRENT_CITY     = {{ user.city     | tojson if verified and user and user.city     else '""' }};
+
+    async function loadDistricts(silent) {
+        const distSel = document.getElementById('districtSelect');
+        const citySel = document.getElementById('citySelect');
+        if (!distSel) return;
+
+        distSel.innerHTML = '<option value="">— Select District —</option>';
+        citySel.innerHTML = '<option value="">— Select City —</option>';
+        if (!silent) { distSel.disabled = true; citySel.disabled = true; }
+
+        const res  = await fetch('/api/places');
+        const data = await res.json();
+        data.districts.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d; opt.textContent = d;
+            if (d === CURRENT_DISTRICT) opt.selected = true;
+            distSel.appendChild(opt);
+        });
+        distSel.disabled = false;
+        if (CURRENT_DISTRICT && silent) await loadCities(true);
+    }
+
+    async function loadCities(silent) {
+        const district = document.getElementById('districtSelect').value;
+        const citySel  = document.getElementById('citySelect');
+        if (!citySel) return;
+
+        citySel.innerHTML = '<option value="">— Select City —</option>';
+        if (!silent) citySel.disabled = true;
+        if (!district) return;
+
+        const res  = await fetch('/api/places?district=' + encodeURIComponent(district));
+        const data = await res.json();
+        data.cities.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c; opt.textContent = c;
+            if (c === CURRENT_CITY) opt.selected = true;
+            citySel.appendChild(opt);
+        });
+        citySel.disabled = false;
+    }
+
+    if (document.getElementById('districtSelect')) loadDistricts(true);
+
+    /* Matrix fill */
+    const katakana = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ';
+    const matrix = document.getElementById('matrix');
+    const count  = Math.ceil((window.innerWidth / 40)) * Math.ceil((window.innerHeight / 40));
+    for (let i = 0; i < Math.min(count, 500); i++) {
+        const span = document.createElement('span');
+        span.textContent = katakana[Math.floor(Math.random() * katakana.length)];
+        matrix.appendChild(span);
+    }
+
+    /* Avatar initials */
+    const name = {{ user.full_name | tojson if verified else '""' }};
+    if (name) {
+        document.getElementById('avatarInitial').textContent = name.charAt(0).toUpperCase();
+        document.getElementById('headerName').textContent = name;
+    }
+
+    /* OTP input handling */
+    const digits = document.querySelectorAll('.otp-digit');
+    digits.forEach((d, i) => {
+        d.addEventListener('input', e => {
+            e.target.value = e.target.value.replace(/\D/g, '');
+            if (e.target.value && i < digits.length - 1) digits[i+1].focus();
+        });
+        d.addEventListener('keydown', e => {
+            if (e.key === 'Backspace' && !e.target.value && i > 0) digits[i-1].focus();
+        });
+    });
+
+    function collectOtp() {
+        const hidden = document.getElementById('otpHidden');
+        if (hidden) hidden.value = Array.from(digits).map(d => d.value).join('');
+    }
+
+    /* Age calculator */
+    const dobInput = document.getElementById('dobInput');
+    const agePill  = document.getElementById('agePill');
+    if (dobInput) {
+        const calcAge = () => {
+            const dob   = new Date(dobInput.value);
+            if (isNaN(dob)) { agePill.style.display='none'; return; }
+            const today = new Date();
+            let y = today.getFullYear() - dob.getFullYear();
+            let m = today.getMonth()    - dob.getMonth();
+            let d = today.getDate()     - dob.getDate();
+            if (d < 0) { m--; d += new Date(today.getFullYear(), today.getMonth(), 0).getDate(); }
+            if (m < 0) { y--; m += 12; }
+            agePill.style.display = 'block';
+            if (y < 18) {
+                agePill.className = 'age-pill invalid';
+                agePill.textContent = `⚠ Age: ${y}y ${m}m ${d}d — Must be 18+`;
+            } else {
+                agePill.className = 'age-pill valid';
+                agePill.textContent = `✓ Age: ${y} years, ${m} months, ${d} days`;
+            }
+        };
+        dobInput.addEventListener('change', calcAge);
+        if (dobInput.value) calcAge();
+    }
+</script>
+</body>
+</html>

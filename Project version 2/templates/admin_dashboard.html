@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#f4f6f9;--surface:#fff;--border:#e5e9f0;--text-primary:#1a1f2e;--text-secondary:#6b7280;--text-muted:#9ca3af;--blue:#3b7be8;--green:#22c55e;--purple:#8b5cf6;--orange:#f97316;--red:#ef4444;--yellow:#f59e0b;--blue-light:#dbeafe;--green-light:#dcfce7;--purple-light:#ede9fe;--orange-light:#ffedd5}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text-primary);min-height:100vh}
+  .header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .header h1{font-size:19px;font-weight:700}
+  .header p{font-size:12px;color:var(--text-secondary);margin-top:2px}
+  .header-right{display:flex;align-items:center;gap:14px}
+  .status-badge{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--green)}
+  .status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(34,197,94,.2)}50%{box-shadow:0 0 0 6px rgba(34,197,94,.1)}}
+  .admin-badge{background:var(--purple-light);color:var(--purple);font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px}
+  .logout-btn{padding:7px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-secondary);text-decoration:none}
+  .logout-btn:hover{background:#e5e7eb}
+  .main{padding:24px 32px;max-width:1400px;margin:0 auto}
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;display:flex;align-items:flex-start;justify-content:space-between;transition:box-shadow .2s}
+  .stat-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.08)}
+  .stat-label{font-size:11px;color:var(--text-secondary);font-weight:500;margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px}
+  .stat-value{font-size:28px;font-weight:700;font-family:'DM Mono',monospace}
+  .stat-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+  .icon-blue{background:var(--blue-light)}.icon-green{background:var(--green-light)}.icon-purple{background:var(--purple-light)}.icon-orange{background:var(--orange-light)}
+  .tabs-bar{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:22px;overflow-x:auto}
+  .tab-btn{padding:9px 16px;font-size:13px;font-weight:500;color:var(--text-secondary);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;font-family:'DM Sans',sans-serif;transition:all .2s}
+  .tab-btn:hover{color:var(--text-primary)}.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
+  .tab-panel{display:none}.tab-panel.active{display:block}
+  .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:18px}
+  .chart-card h3{font-size:14px;font-weight:600;margin-bottom:16px}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:900px){.stat-grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}}
+  .log-feed{display:flex;flex-direction:column;gap:5px;max-height:580px;overflow-y:auto}
+  .log-item{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;background:var(--bg);border-radius:9px;border-left:3px solid var(--border)}
+  .log-item.REGISTERED{border-left-color:var(--green)}.log-item.LOGIN_SUCCESS{border-left-color:var(--blue)}.log-item.LOGIN_FAILED{border-left-color:var(--red)}.log-item.VOTED{border-left-color:var(--purple)}.log-item.LOGOUT{border-left-color:var(--text-muted)}.log-item.ADMIN_LOGIN{border-left-color:var(--orange)}.log-item.ADDRESS_CHANGE{border-left-color:var(--yellow)}.log-item.PROPOSED_ACTION,.log-item.VOTED_ON_PROPOSAL,.log-item.PROPOSAL_APPROVED{border-left-color:var(--orange)}
+  .log-icon{font-size:17px;flex-shrink:0;margin-top:1px}
+  .log-body{flex:1;min-width:0}
+  .log-main{font-size:13px;font-weight:500;color:var(--text-primary)}
+  .log-detail{font-size:11px;color:var(--text-secondary);margin-top:2px;word-break:break-all}
+  .log-time{font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;flex-shrink:0}
+  .data-table{width:100%;border-collapse:collapse}
+  .data-table th{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;text-align:left;padding:0 0 10px}
+  .data-table td{padding:10px 0;border-top:1px solid var(--border);font-size:14px}
+  .bar-cell{display:flex;align-items:center;gap:8px}
+  .bar-bg{flex:1;height:5px;background:var(--border);border-radius:3px}
+  .bar-fill{height:100%;border-radius:3px;background:var(--blue)}
+  .proposal-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:12px}
+  .proposal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+  .proposal-type{font-size:11px;font-weight:700;background:var(--orange-light);color:var(--orange);padding:3px 9px;border-radius:20px}
+  .proposal-by{font-size:11px;color:var(--text-muted)}
+  .proposal-detail{font-size:14px;font-weight:500;margin-bottom:12px}
+  .approval-label{font-size:12px;color:var(--text-secondary);margin-bottom:5px;display:flex;justify-content:space-between}
+  .approval-bar-bg{height:7px;background:var(--border);border-radius:4px;margin-bottom:12px}
+  .approval-bar-fill{height:100%;border-radius:4px;background:var(--green)}
+  .approval-bar-fill.low{background:var(--orange)}
+  .vote-btns{display:flex;gap:8px}
+  .vote-btn{padding:7px 16px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+  .vote-approve{background:var(--green);color:#fff}.vote-approve:hover{background:#16a34a}
+  .vote-reject{background:#fef2f2;color:var(--red);border:1px solid #fecaca}.vote-reject:hover{background:#fee2e2}
+  .already-voted-msg{font-size:12px;color:var(--text-muted);font-style:italic}
+  .new-proposal-form{background:var(--bg);border-radius:12px;padding:16px;margin-bottom:18px}
+  .new-proposal-form h4{font-size:14px;font-weight:600;margin-bottom:10px}
+  .np-row{display:flex;gap:8px;flex-wrap:wrap}
+  .np-input{flex:1;min-width:150px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:#fff}
+  .np-btn{padding:9px 16px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+  .np-btn:hover{background:#2563eb}
+  .threshold-note{font-size:12px;color:#0369a1;background:var(--blue-light);padding:8px 12px;border-radius:8px;margin-bottom:16px}
+  .flash-bar{padding:11px 16px;border-radius:10px;font-size:13px;font-weight:500;margin-bottom:16px}
+  .flash-info{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}
+  .flash-success{background:var(--green-light);color:#15803d;border:1px solid #86efac}
+  .flash-danger{background:#fef2f2;color:var(--red);border:1px solid #fecaca}
+  .flash-warning{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+  .no-data{text-align:center;padding:32px;color:var(--text-muted);font-size:14px}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div>
+    <h1 style="display:flex;align-items:center;gap:10px;"><img src="https://cdn-icons-png.flaticon.com/512/2889/2889676.png" style="width:30px;height:30px;" alt="admin"> Admin Dashboard</h1>
+    <p>Indian Elections 2026 — Control Panel</p>
+  </div>
+  <div class="header-right">
+    <div class="status-badge"><span class="status-dot"></span>Live</div>
+    <span class="admin-badge">{{ current_admin }}</span>
+    <a href="/logout" class="logout-btn">Logout</a>
+  </div>
+</header>
+
+<main class="main">
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="flash-bar flash-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <div class="stat-grid">
+    <div class="stat-card"><div><div class="stat-label">Total Votes</div><div class="stat-value">{{ total_votes }}</div></div><div class="stat-icon icon-blue"><img src="https://cdn-icons-png.flaticon.com/512/3201/3201299.png" style="width:28px;height:28px;" alt="votes"></div></div>
+    <div class="stat-card"><div><div class="stat-label">Registered Users</div><div class="stat-value">{{ total_users }}</div></div><div class="stat-icon icon-green">👥</div></div>
+    <div class="stat-card"><div><div class="stat-label">Turnout</div><div class="stat-value">{{ turnout }}%</div></div><div class="stat-icon icon-purple"><img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" style="width:28px;height:28px;" alt="stats"></div></div>
+    <div class="stat-card"><div><div class="stat-label">Not Voted Yet</div><div class="stat-value">{{ not_voted_count }}</div></div><div class="stat-icon icon-orange">⏳</div></div>
+  </div>
+
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="switchTab('overview',this)">📈 Overview</button>
+    <button class="tab-btn" onclick="switchTab('city',this)">📍 City Stats</button>
+    <button class="tab-btn" onclick="switchTab('updates',this)">🔔 Updates</button>
+    <button class="tab-btn" onclick="switchTab('proposals',this)" style="display:inline-flex;align-items:center;gap:6px;"><img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" style="width:16px;height:16px;" alt="proposals"> Proposals ({{ pending_proposals|length }})</button>
+  </div>
+
+  <!-- OVERVIEW TAB -->
+  <div id="tab-overview" class="tab-panel active">
+    {% if total_votes > 0 %}
+    <div class="two-col">
+      <div class="chart-card"><h3>Votes by Party</h3><div style="height:260px"><canvas id="barChart"></canvas></div></div>
+      <div class="chart-card"><h3>Vote Share</h3><div style="height:260px"><canvas id="pieChart"></canvas></div></div>
+    </div>
+    <div class="chart-card" style="text-align:center;padding:28px">
+      <h3 style="margin-bottom:16px">🏆 Currently Leading</h3>
+      <div style="font-size:40px;margin-bottom:8px">🏆</div>
+      <div style="font-size:24px;font-weight:700">{{ leading_party }}</div>
+      <div style="font-size:14px;color:var(--text-secondary);margin-top:4px">{{ leading_party_full }}</div>
+      <div style="font-size:18px;font-weight:700;color:var(--blue);margin-top:8px">{{ leading_votes }} votes</div>
+    </div>
+    {% else %}
+    <div class="chart-card"><div class="no-data" style="display:flex;align-items:center;justify-content:center;gap:8px;"><img src="https://cdn-icons-png.flaticon.com/512/3201/3201299.png" style="width:18px;height:18px;" alt="vote"> No votes cast yet.</div></div>
+    {% endif %}
+    <div class="two-col" style="margin-top:18px">
+      <div class="chart-card">
+        <h3>Login Activity</h3>
+        <div style="display:flex;gap:12px">
+          <div style="flex:1;background:var(--green-light);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:22px;font-weight:700;font-family:'DM Mono',monospace;color:#15803d">{{ login_success_count }}</div>
+            <div style="font-size:11px;color:#15803d;margin-top:4px">Successful</div>
+          </div>
+          <div style="flex:1;background:#fef2f2;border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:22px;font-weight:700;font-family:'DM Mono',monospace;color:var(--red)">{{ login_failed_count }}</div>
+            <div style="font-size:11px;color:var(--red);margin-top:4px">Failed</div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>Recent Activity</h3>
+        <div style="max-height:140px;overflow-y:auto">
+          {% for log in recent_logs[:8] %}
+          <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px">
+            <span style="font-weight:500">{{ log[0] or '—' }} — <span style="color:var(--text-secondary)">{{ log[1] }}</span></span>
+            <span style="color:var(--text-muted);font-family:'DM Mono',monospace">{{ log[3].strftime('%H:%M') if log[3] else '' }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CITY TAB -->
+  <div id="tab-city" class="tab-panel">
+    <div class="two-col">
+      <div class="chart-card">
+        <h3>📍 Votes by City</h3>
+        {% if city_labels %}
+        <div style="height:240px;margin-bottom:18px"><canvas id="cityChart"></canvas></div>
+        <table class="data-table">
+          <thead><tr><th>City</th><th>Votes</th><th style="width:40%">Share</th></tr></thead>
+          <tbody>
+            {% set max_c = city_counts[0] if city_counts else 1 %}
+            {% for i in range(city_labels|length) %}
+            <tr>
+              <td style="font-weight:600">{{ city_labels[i] }}</td>
+              <td style="font-family:'DM Mono',monospace;font-weight:700">{{ city_counts[i] }}</td>
+              <td><div class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:{{ ((city_counts[i]/max_c)*100)|round }}%"></div></div><span style="font-size:11px;color:var(--text-muted)">{{ ((city_counts[i]/total_votes)*100)|round(1) if total_votes else 0 }}%</span></div></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">No city vote data yet.</div>
+        {% endif %}
+      </div>
+      <div class="chart-card">
+        <h3>👥 Registered Voters by City</h3>
+        {% if reg_city_rows %}
+        <table class="data-table">
+          <thead><tr><th>City</th><th>district</th><th>Registered</th></tr></thead>
+          <tbody>
+            {% for r in reg_city_rows %}
+            <tr>
+              <td style="font-weight:600">{{ r[0] }}</td>
+              <td style="color:var(--text-secondary)">{{ r[1] }}</td>
+              <td style="font-family:'DM Mono',monospace;font-weight:700">{{ r[2] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">No city registration data yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- UPDATES TAB -->
+  <div id="tab-updates" class="tab-panel">
+    <div class="chart-card">
+      <h3 style="margin-bottom:16px">🔔 Live Activity Feed <span style="font-size:12px;color:var(--text-muted);font-weight:400">(last 100 events, newest first)</span></h3>
+      {% if all_logs %}
+      <div class="log-feed">
+        {% for log in all_logs %}
+        {% set action = log[1] %}
+        <div class="log-item {{ action }}">
+          <div class="log-icon">
+            {% if action == 'REGISTERED' %}🟢
+            {% elif action == 'LOGIN_SUCCESS' %}🔵
+            {% elif action == 'LOGIN_FAILED' %}🔴
+            {% elif action == 'VOTED' %}🟣
+            {% elif action == 'LOGOUT' %}⚪
+            {% elif action == 'ADMIN_LOGIN' %}🟠
+            {% elif action == 'ADMIN_LOGIN_FAILED' %}🔴
+            {% elif action == 'ADDRESS_CHANGE' %}🟡
+            {% elif action in ('PROPOSED_ACTION','VOTED_ON_PROPOSAL','PROPOSAL_APPROVED') %}🟠
+            {% else %}⚪{% endif %}
+          </div>
+          <div class="log-body">
+            <div class="log-main">
+              <strong>{{ log[0] or 'System' }}</strong> —
+              {% if action == 'REGISTERED' %}registered a new account
+              {% elif action == 'LOGIN_SUCCESS' %}logged in successfully
+              {% elif action == 'LOGIN_FAILED' %}failed login attempt
+              {% elif action == 'VOTED' %}cast their vote
+              {% elif action == 'LOGOUT' %}logged out
+              {% elif action == 'ADMIN_LOGIN' %}admin signed in
+              {% elif action == 'ADMIN_LOGIN_FAILED' %}failed admin login
+              {% elif action == 'ADDRESS_CHANGE' %}changed their registered address
+              {% elif action == 'PROPOSED_ACTION' %}submitted a proposal
+              {% elif action == 'VOTED_ON_PROPOSAL' %}voted on a proposal
+              {% elif action == 'PROPOSAL_APPROVED' %}proposal was approved
+              {% else %}{{ action }}{% endif %}
+            </div>
+            {% if log[2] %}<div class="log-detail">{{ log[2] }}</div>{% endif %}
+          </div>
+          <div class="log-time">{{ log[3].strftime('%d/%m %H:%M:%S') if log[3] else '' }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="no-data">No activity recorded yet.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- PROPOSALS TAB -->
+  <div id="tab-proposals" class="tab-panel">
+    <div class="chart-card">
+      <div class="threshold-note">🔐 Sensitive actions require at least <strong>{{ needed }}/{{ total_admins }} admin approvals (≥70%)</strong>. As more admins are added to the system, the required number updates automatically.</div>
+
+      <div class="new-proposal-form">
+        <h4>➕ Submit a New Proposal</h4>
+        <form method="POST" action="{{ url_for('admin_propose') }}">
+          <div class="np-row">
+            <select name="action_type" class="np-input" required>
+              <option value="">Select Action Type</option>
+              <option value="DELETE_VOTER">Delete a Voter Account</option>
+              <option value="RESET_ELECTION">Reset Election Data</option>
+              <option value="EXTEND_VOTING">Extend Voting Period</option>
+              <option value="CLOSE_VOTING">Close Voting</option>
+              <option value="OTHER">Other</option>
+            </select>
+            <input type="text" name="action_detail" class="np-input" placeholder="Describe the change in detail..." required>
+            <button type="submit" class="np-btn">Submit</button>
+          </div>
+        </form>
+      </div>
+
+      <h3 style="margin-bottom:14px">Pending Proposals ({{ pending_proposals|length }})</h3>
+      {% if pending_proposals %}
+        {% for p in pending_proposals %}
+        {% set pct = ((p[6] / total_admins) * 100)|round(1) if total_admins > 0 else 0 %}
+        <div class="proposal-card">
+          <div class="proposal-header">
+            <span class="proposal-type">{{ p[2] }}</span>
+            <span class="proposal-by">by {{ p[1] }} · {{ p[4].strftime('%d %b, %H:%M') if p[4] else '' }}</span>
+          </div>
+          <div class="proposal-detail">{{ p[3] }}</div>
+          <div class="approval-label"><span>{{ p[6] }}/{{ total_admins }} approvals</span><span>Need {{ needed }} (70%)</span></div>
+          <div class="approval-bar-bg"><div class="approval-bar-fill {% if pct < 70 %}low{% endif %}" style="width:{{ pct }}%"></div></div>
+          {% if p[0] in already_voted_proposals %}
+          <div class="already-voted-msg">✓ You have already voted on this proposal.</div>
+          {% else %}
+          <div class="vote-btns">
+            <form method="POST" action="{{ url_for('vote_proposal') }}" style="display:inline">
+              <input type="hidden" name="proposal_id" value="{{ p[0] }}">
+              <input type="hidden" name="approved" value="1">
+              <button type="submit" class="vote-btn vote-approve">✓ Approve</button>
+            </form>
+            <form method="POST" action="{{ url_for('vote_proposal') }}" style="display:inline">
+              <input type="hidden" name="proposal_id" value="{{ p[0] }}">
+              <input type="hidden" name="approved" value="0">
+              <button type="submit" class="vote-btn vote-reject">✗ Reject</button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="no-data">No pending proposals right now.</div>
+      {% endif %}
+    </div>
+  </div>
+
+</main>
+
+<script>
+  function switchTab(name, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  const colors = ['#f97316','#38bdf8','#1e3a8a','#22c55e','#dc2626','#ef4444','#2563eb','#0d9488','#8b5cf6','#f59e0b','#6b7280'];
+
+  {% if total_votes > 0 %}
+  const partyLabels = {{ party_labels | tojson }};
+  const partyCounts = {{ party_counts | tojson }};
+  new Chart(document.getElementById('barChart'),{type:'bar',data:{labels:partyLabels,datasets:[{label:'Votes',data:partyCounts,backgroundColor:colors.slice(0,partyLabels.length),borderRadius:6,barPercentage:.6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(0,0,0,.04)'},ticks:{color:'#9ca3af',font:{family:'DM Sans',size:11}}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{color:'#9ca3af',font:{family:'DM Sans',size:11},stepSize:1},beginAtZero:true}}}});
+  new Chart(document.getElementById('pieChart'),{type:'pie',data:{labels:partyLabels,datasets:[{data:partyCounts,backgroundColor:colors.slice(0,partyLabels.length),borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#374151',font:{family:'DM Sans',size:11},padding:12,usePointStyle:true}}}}});
+  {% endif %}
+
+  {% if city_labels %}
+  const cityLabels = {{ city_labels | tojson }};
+  const cityCounts = {{ city_counts | tojson }};
+  new Chart(document.getElementById('cityChart'),{type:'bar',data:{labels:cityLabels,datasets:[{label:'Votes',data:cityCounts,backgroundColor:'#3b7be8',borderRadius:6,barPercentage:.55}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(0,0,0,.04)'},ticks:{color:'#9ca3af',font:{family:'DM Sans',size:11}}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{color:'#9ca3af',font:{family:'DM Sans',size:11},stepSize:1},beginAtZero:true}}}});
+  {% endif %}
+</script>
+</body>
+</html>

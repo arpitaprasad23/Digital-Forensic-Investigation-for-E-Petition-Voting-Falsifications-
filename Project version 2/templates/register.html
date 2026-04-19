@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Voting - Register</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; padding: 20px; min-height: 100vh; }
+        .admin-corner {
+            position: fixed; top: 16px; right: 16px;
+            padding: 7px 14px; background: #f3f4f6;
+            border: 1px solid #d1d5db; border-radius: 8px;
+            font-size: 12px; font-weight: 600; color: #6b7280;
+            text-decoration: none; transition: all 0.2s;
+        }
+        .admin-corner:hover { background: #e5e7eb; color: #374151; }
+        .container {
+            max-width: 420px; margin: 0 auto;
+            background: white; border-radius: 20px; padding: 40px 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1); position: relative;
+        }
+        .back-btn { position: absolute; top: 24px; left: 24px; color: #4f46e5; text-decoration: none; font-size: 14px; font-weight: 500; }
+        .back-btn::before { content: "←"; margin-right: 6px; }
+        .icon-circle {
+            width: 64px; height: 64px; border-radius: 50%; background: #10b981;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px; font-size: 30px;
+        }
+        h1 { font-size: 26px; font-weight: 700; text-align: center; margin-bottom: 6px; color: #111827; }
+        .subtitle { font-size: 15px; color: #6b7280; text-align: center; margin-bottom: 28px; }
+        .flash-error { color: #ef4444; font-size: 13px; margin-bottom: 16px; background: #fef2f2; padding: 10px 14px; border-radius: 8px; border: 1px solid #fecaca; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+        input, select {
+            width: 100%; padding: 11px 14px;
+            border: 1px solid #d1d5db; border-radius: 10px;
+            font-size: 15px; background: #fafbfc; font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus { outline: none; border-color: #10b981; background: white; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+        select:disabled { background: #f1f5f9; color: #9ca3af; cursor: not-allowed; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        /* Age display box */
+        .age-display {
+            display: none;
+            margin-top: 8px; padding: 10px 14px;
+            border-radius: 8px; font-size: 13px; font-weight: 500;
+        }
+        .age-display.valid { background: #f0fdf4; color: #15803d; border: 1px solid #86efac; }
+        .age-display.invalid { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+
+        .btn {
+            width: 100%; padding: 13px; border: none; border-radius: 12px;
+            font-size: 16px; font-weight: 600; cursor: pointer;
+            background: #10b981; color: white; margin-top: 4px; margin-bottom: 18px;
+            transition: all 0.2s; font-family: 'Inter', sans-serif;
+        }
+        .btn:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(16,185,129,0.3); }
+        .login-link { text-align: center; font-size: 14px; color: #4f46e5; text-decoration: none; display: block; }
+        .login-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <a href="/admin_login" class="admin-corner" style="display:inline-flex;align-items:center;gap:6px;"><img src="https://cdn-icons-png.flaticon.com/512/2889/2889676.png" style="width:14px;height:14px;" alt="admin"> Admin Login</a>
+
+    <div class="container">
+        <a href="/" class="back-btn">Back to Home</a>
+        <div class="icon-circle"><img src="https://cdn-icons-png.flaticon.com/512/1380/1380338.png" style="width:34px;height:34px;" alt="register"></div>
+        <h1>Register</h1>
+        <p class="subtitle">Create your voting account</p>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-error">{{ messages[0] }}</div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('register') }}" id="regForm">
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="name" placeholder="Arpita Prasad" required>
+            </div>
+
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" placeholder="arpita@gmail.com" required>
+            </div>
+
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" name="phone" placeholder="9876543210" required>
+            </div>
+
+            <div class="form-group">
+                <label>Aadhar Number</label>
+                <input type="text" name="aadhar" placeholder="1234 5678 9012" maxlength="14" required>
+            </div>
+
+            <div class="form-group">
+                <label>Voter ID Number</label>
+                <input type="text" name="voter" placeholder="ABC1234567" required>
+            </div>
+
+            <div class="two-col">
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="Min 6 chars" required>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" name="confirm_password" placeholder="Repeat" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Date of Birth</label>
+                <input type="date" name="dob" id="dobInput" required>
+                <div class="age-display" id="ageDisplay"></div>
+            </div>
+
+            <div class="form-group">
+                <label>State</label>
+                <input type="text" value="Maharashtra" readonly
+                       style="background:#f1f5f9;color:#374151;cursor:not-allowed;">
+                <input type="hidden" name="state" value="Maharashtra">
+            </div>
+
+            <div class="form-group">
+                <label>District</label>
+                <select name="district" id="districtSelect" required onchange="loadCities()">
+                    <option value="">— Select District —</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>City</label>
+                <select name="city" id="citySelect" required disabled>
+                    <option value="">— Select City —</option>
+                </select>
+            </div>
+
+            <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:11px 14px;margin-bottom:18px;font-size:13px;color:#92400e;">
+                <img src="https://cdn-icons-png.flaticon.com/512/564/564619.png" style="width:14px;height:14px;vertical-align:middle;" alt="warning"> If you move to a different city or district, re-registering will delete all your old voting data and assign you to the new area's elections.
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn" style="display:inline-flex;align-items:center;gap:8px;"><img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" style="width:18px;height:18px;" alt="go"> Register</button>
+        </form>
+
+        <a href="{{ url_for('login') }}" class="login-link">Already have an account? Login here</a>
+    </div>
+
+<script>
+    // ── Cascading Place Dropdowns (Maharashtra only) ──
+    async function loadDistricts() {
+        const distSel = document.getElementById('districtSelect');
+        const citySel = document.getElementById('citySelect');
+
+        distSel.innerHTML = '<option value="">— Loading... —</option>';
+        citySel.innerHTML = '<option value="">— Select City —</option>';
+        citySel.disabled = true;
+
+        const res  = await fetch('/api/places');
+        const data = await res.json();
+        distSel.innerHTML = '<option value="">— Select District —</option>';
+        data.districts.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d; opt.textContent = d;
+            distSel.appendChild(opt);
+        });
+    }
+
+    async function loadCities() {
+        const district = document.getElementById('districtSelect').value;
+        const citySel  = document.getElementById('citySelect');
+
+        citySel.innerHTML = '<option value="">— Select City —</option>';
+        citySel.disabled  = true;
+        if (!district) return;
+
+        const res  = await fetch('/api/places?district=' + encodeURIComponent(district));
+        const data = await res.json();
+        data.cities.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c; opt.textContent = c;
+            citySel.appendChild(opt);
+        });
+        citySel.disabled = false;
+    }
+
+    // Load districts immediately on page load
+    loadDistricts();
+
+    // ── Age Check ──
+    const dobInput    = document.getElementById('dobInput');
+    const ageDisplay  = document.getElementById('ageDisplay');
+    const submitBtn   = document.getElementById('submitBtn');
+
+    dobInput.addEventListener('change', function () {
+        const dob = new Date(this.value);
+        if (isNaN(dob)) { ageDisplay.style.display = 'none'; return; }
+
+        const today = new Date();
+
+        let years  = today.getFullYear() - dob.getFullYear();
+        let months = today.getMonth()    - dob.getMonth();
+        let days   = today.getDate()     - dob.getDate();
+
+        if (days < 0) {
+            months--;
+            const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+            days += prevMonth.getDate();
+        }
+        if (months < 0) { years--; months += 12; }
+
+        ageDisplay.style.display = 'block';
+
+        if (years < 18) {
+            ageDisplay.className = 'age-display invalid';
+            ageDisplay.textContent =
+                `Age: ${years} years, ${months} months, ${days} days — You must be 18+ to register.`;
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.5';
+            submitBtn.style.cursor  = 'not-allowed';
+        } else {
+            ageDisplay.className = 'age-display valid';
+            ageDisplay.textContent =
+                `Age: ${years} years, ${months} months, ${days} days`;
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor  = 'pointer';
+        }
+    });
+</script>
+</body>
+</html>
