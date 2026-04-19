@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Vote Receipt</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; min-height: 100vh; padding: 40px 16px; display: flex; align-items: flex-start; justify-content: center; }
+        .page { max-width: 560px; width: 100%; }
+        .back { display: inline-flex; align-items: center; gap: 6px; color: #6b7280; font-size: 14px; text-decoration: none; margin-bottom: 24px; }
+        .back:hover { color: #111827; }
+        .receipt { background: white; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); overflow: hidden; }
+        .receipt-header { background: linear-gradient(135deg, #16a34a, #22c55e); padding: 28px 32px; text-align: center; color: white; }
+        .receipt-header .icon { font-size: 40px; margin-bottom: 10px; }
+        .receipt-header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+        .receipt-header p { font-size: 14px; opacity: 0.85; }
+        .receipt-number-band { background: #f0fdf4; border-top: 2px dashed #86efac; border-bottom: 2px dashed #86efac; padding: 18px 32px; text-align: center; }
+        .receipt-number-label { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .receipt-number-value { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 700; color: #111827; letter-spacing: 3px; }
+        .receipt-body { padding: 24px 32px; }
+        .row { display: flex; justify-content: space-between; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid #f3f4f6; }
+        .row:last-child { border-bottom: none; }
+        .row-label { font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; }
+        .row-value { font-size: 15px; font-weight: 600; color: #111827; text-align: right; max-width: 60%; }
+        .vote-highlight { background: #f0fdf4; border-radius: 12px; padding: 16px 20px; margin: 16px 0; text-align: center; }
+        .vote-highlight .party-abbr { font-size: 28px; font-weight: 700; color: #15803d; }
+        .vote-highlight .party-full { font-size: 14px; color: #6b7280; margin-top: 3px; }
+        .expiry-bar { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 12px 16px; margin: 0 32px 24px; text-align: center; font-size: 13px; color: #92400e; font-weight: 500; }
+        .expiry-bar strong { color: #dc2626; }
+        .forensics { background: #f8fafc; border-top: 1px solid #e5e7eb; padding: 20px 32px; }
+        .forensics-title { font-size: 12px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+        .forensics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .f-item { background: white; border-radius: 10px; padding: 12px 14px; border: 1px solid #e5e7eb; }
+        .f-label { font-size: 11px; color: #9ca3af; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .f-value { font-size: 13px; font-weight: 600; color: #374151; font-family: 'DM Mono', monospace; word-break: break-all; }
+        .actions { display: flex; gap: 10px; padding: 20px 32px 28px; flex-wrap: wrap; }
+        .btn { flex: 1; min-width: 120px; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .btn-green { background: #22c55e; color: white; }
+        .btn-green:hover { background: #16a34a; }
+        .btn-gray { background: #f3f4f6; color: #374151; }
+        .btn-gray:hover { background: #e5e7eb; }
+        @media print {
+            .back, .actions { display: none; }
+            body { background: white; padding: 0; }
+            .receipt { box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <a href="/dashboard" class="back">← Back to Dashboard</a>
+
+    <div class="receipt">
+        <div class="receipt-header">
+            <div class="icon"><img src="https://cdn-icons-png.flaticon.com/512/3201/3201299.png" style="width:48px;height:48px;" alt="vote"></div>
+            <h1>Digital Vote Receipt</h1>
+            <p>Indian Elections 2026 — Official Record</p>
+        </div>
+
+        <div class="receipt-number-band">
+            <div class="receipt-number-label">Receipt Number</div>
+            <div class="receipt-number-value">{{ r.receipt_number }}</div>
+        </div>
+
+        <div class="receipt-body">
+            <div class="vote-highlight">
+                <div class="party-abbr">{{ r.party }}</div>
+                <div class="party-full">{{ r.party_full }}</div>
+            </div>
+            <div class="row">
+                <div class="row-label">Voter Name</div>
+                <div class="row-value">{{ r.full_name }}</div>
+            </div>
+            <div class="row">
+                <div class="row-label">Voter ID</div>
+                <div class="row-value">{{ r.voter_number }}</div>
+            </div>
+            <div class="row">
+                <div class="row-label">Email</div>
+                <div class="row-value">{{ r.email }}</div>
+            </div>
+            <div class="row">
+                <div class="row-label">Vote Cast At</div>
+                <div class="row-value">{{ r.voted_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+            </div>
+            <div class="row">
+                <div class="row-label">Receipt Issued</div>
+                <div class="row-value">{{ r.issued_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+            </div>
+        </div>
+
+        <div class="expiry-bar">
+            ⏳ Expires at <strong>{{ r.expires_at.strftime('%d %b %Y, %I:%M %p') }}</strong> — save or print before then
+        </div>
+
+        <!-- Forensic section -->
+        <div class="forensics">
+            <div class="forensics-title">🔬 Forensic Information</div>
+            <div class="forensics-grid">
+                <div class="f-item">
+                    <div class="f-label">Receipt ID</div>
+                    <div class="f-value">{{ r.receipt_number }}</div>
+                </div>
+                <div class="f-item">
+                    <div class="f-label">Election Code</div>
+                    <div class="f-value">IND-ELECT-2026</div>
+                </div>
+                <div class="f-item">
+                    <div class="f-label">Timestamp (UTC)</div>
+                    <div class="f-value">{{ r.voted_at.strftime('%Y%m%d%H%M%S') }}</div>
+                </div>
+                <div class="f-item">
+                    <div class="f-label">Verification</div>
+                    <div class="f-value" style="color:#16a34a;">VERIFIED ✓</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-green" onclick="window.print()">🖨️ Print</button>
+            <button class="btn btn-gray" onclick="copyNum()" style="display:inline-flex;align-items:center;gap:6px;"><img src="https://cdn-icons-png.flaticon.com/512/1621/1621563.png" style="width:16px;height:16px;" alt="copy"> Copy Number</button>
+            <button class="btn btn-gray" onclick="window.location.href='/results'" style="display:inline-flex;align-items:center;gap:6px;"><img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" style="width:16px;height:16px;" alt="results"> Results</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyNum() {
+        navigator.clipboard.writeText('{{ r.receipt_number }}').then(() => {
+            alert('Receipt number copied!');
+        });
+    }
+</script>
+</body>
+</html>

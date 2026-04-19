@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Elections 2026 - Cast Your Vote</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #f9fafb; min-height: 100vh; padding: 32px 16px 80px; }
+
+        /* NAV */
+        .nav {
+            max-width: 960px; margin: 0 auto 36px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-brand { font-size: 18px; font-weight: 700; color: #111827; }
+        .nav-right { display: flex; align-items: center; gap: 16px; }
+        .nav-user { font-size: 14px; color: #6b7280; }
+        .logout-btn {
+            padding: 8px 16px; background: #f3f4f6; border: none;
+            border-radius: 8px; font-size: 14px; cursor: pointer;
+            color: #374151; font-family: 'Inter', sans-serif;
+        }
+        .logout-btn:hover { background: #e5e7eb; }
+
+        /* ALREADY VOTED BANNER */
+        .voted-banner {
+            max-width: 960px; margin: 0 auto 28px;
+            background: #f0fdf4; border: 2px solid #86efac; border-radius: 16px;
+            padding: 24px 28px; text-align: center;
+        }
+        .voted-banner h2 { font-size: 22px; font-weight: 700; color: #15803d; margin-bottom: 6px; }
+        .voted-banner p { color: #166534; font-size: 15px; }
+        .voted-party { font-size: 28px; font-weight: 700; color: #111827; margin: 10px 0 4px; }
+
+        /* VOTING SCREEN */
+        #votingScreen { max-width: 960px; margin: 0 auto; }
+        h1 { font-size: 32px; font-weight: 700; text-align: center; color: #111827; margin-bottom: 6px; }
+        .subtitle { font-size: 16px; color: #6b7280; text-align: center; margin-bottom: 36px; }
+
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 36px; }
+        @media (max-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .party-card {
+            background: white; border: 2px solid #e5e7eb; border-radius: 18px;
+            padding: 28px 16px 20px; text-align: center; cursor: pointer;
+            transition: all 0.2s; position: relative;
+        }
+        .party-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); }
+        .party-card.selected { border-color: #22c55e; background: #f0fdf4; box-shadow: 0 8px 24px rgba(34,197,94,0.15); }
+
+        .check-badge {
+            display: none; position: absolute; top: 12px; right: 12px;
+            width: 26px; height: 26px; border-radius: 50%; background: #22c55e;
+            color: white; font-size: 14px; font-weight: 700;
+            align-items: center; justify-content: center;
+        }
+        .party-card.selected .check-badge { display: flex; }
+
+        .party-logo {
+            width: 72px; height: 72px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; font-weight: 700; color: white;
+            margin: 0 auto 14px; line-height: 1.2; text-align: center;
+        }
+        .party-abbr { font-size: 17px; font-weight: 700; color: #111827; margin-bottom: 4px; }
+        .party-name { font-size: 12px; color: #6b7280; }
+
+        .submit-wrap { display: flex; justify-content: center; }
+        .btn-submit {
+            padding: 15px 56px; background: #d1d5db; color: #9ca3af;
+            border: none; border-radius: 14px; font-size: 17px; font-weight: 600;
+            cursor: not-allowed; transition: all 0.2s; font-family: 'Inter', sans-serif;
+        }
+        .btn-submit.active { background: #22c55e; color: white; cursor: pointer; }
+        .btn-submit.active:hover { background: #16a34a; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(34,197,94,0.3); }
+
+        /* CONFIRMATION */
+        #confirmScreen { display: none; max-width: 640px; margin: 0 auto; text-align: center; padding-top: 20px; }
+        .success-icon {
+            width: 100px; height: 100px; border-radius: 50%; background: #dcfce7;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 28px; font-size: 48px;
+            animation: pop 0.5s ease;
+        }
+        @keyframes pop {
+            0%   { transform: scale(0.5); opacity: 0; }
+            70%  { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .confirm-title { font-size: 30px; font-weight: 700; color: #111827; margin-bottom: 8px; }
+        .confirm-sub { font-size: 16px; color: #6b7280; margin-bottom: 28px; }
+        .voted-for-card { border: 2px solid #bbf7d0; background: #f0fdf4; border-radius: 18px; padding: 24px 28px; margin-bottom: 20px; }
+        .voted-label { font-size: 14px; color: #6b7280; margin-bottom: 6px; }
+        .voted-abbr { font-size: 30px; font-weight: 700; color: #111827; margin-bottom: 4px; }
+        .voted-full { font-size: 15px; color: #374151; }
+        .info-box { background: #fffbeb; border-radius: 14px; padding: 18px 22px; font-size: 14px; color: #92400e; line-height: 1.6; margin-bottom: 24px; }
+        .btn-home { padding: 13px 36px; background: #4f46e5; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+        .btn-home:hover { background: #3730a3; transform: translateY(-1px); }
+        .btn-receipt { padding: 13px 36px; background: #10b981; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; margin-right: 12px; }
+        .btn-receipt:hover { background: #059669; transform: translateY(-1px); }
+        .btn-results { padding: 13px 36px; background: #8b5cf6; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; text-decoration: none; display: inline-block; }
+        .btn-results:hover { background: #7c3aed; transform: translateY(-1px); }
+        .receipt-box { background: #f0fdf4; border: 2px dashed #22c55e; border-radius: 14px; padding: 18px 22px; margin-bottom: 20px; text-align: center; }
+        .receipt-number { font-size: 22px; font-weight: 700; color: #15803d; font-family: monospace; letter-spacing: 2px; margin: 6px 0; }
+        .receipt-note { font-size: 12px; color: #6b7280; margin-top: 4px; }
+        .btn-row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+        .already-voted-actions { display: flex; gap: 12px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="nav">
+    <div class="nav-brand" style="display:flex;align-items:center;gap:8px;">
+        <img src="https://cdn-icons-png.flaticon.com/512/3201/3201299.png" alt="vote" style="width:22px;height:22px;">
+        Online Voting
+    </div>
+    <div class="nav-right">
+        <span class="nav-user">Welcome, {{ user_name }}</span>
+        <a href="/account" style="text-decoration:none;">
+            <button class="logout-btn" style="display:flex;align-items:center;gap:6px;">
+                <img src="https://cdn-icons-png.flaticon.com/512/1077/1077063.png" alt="account" style="width:16px;height:16px;">
+                Account
+            </button>
+        </a>
+        <a href="/logout" style="text-decoration:none;">
+            <button class="logout-btn" style="display:flex;align-items:center;gap:6px;">
+                <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="logout" style="width:16px;height:16px;">
+                Logout
+            </button>
+        </a>
+    </div>
+</div>
+
+<!-- ALREADY VOTED STATE -->
+{% if already_voted %}
+<div class="voted-banner">
+    <h2 style="display:flex;align-items:center;justify-content:center;gap:8px;"><img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" style="width:26px;height:26px;" alt="check"> You have already voted!</h2>
+    <p>Your vote has been recorded securely. Thank you for participating.</p>
+    <div class="voted-party">{{ already_voted['party'] }}</div>
+    <p>{{ already_voted['party_full'] }}</p>
+    {% if receipt_valid %}
+    <div class="receipt-box" style="margin-top:16px;">
+        <div style="font-size:13px;color:#6b7280;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:5px;"><img src="https://cdn-icons-png.flaticon.com/512/2257/2257295.png" style="width:14px;height:14px;" alt="receipt"> Your Digital Receipt (valid 24 hrs)</div>
+        <div class="receipt-number">{{ already_voted['receipt_number'] }}</div>
+        <div class="receipt-note">Save this number to verify your vote on the Results page</div>
+    </div>
+    {% endif %}
+    <div class="already-voted-actions">
+        <a href="/results" class="btn-results" style="display:inline-flex;align-items:center;gap:8px;"><img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" style="width:18px;height:18px;" alt="results"> View Results</a>
+    </div>
+</div>
+
+{% else %}
+
+<!-- VOTING SCREEN -->
+<div id="votingScreen">
+    <h1>Indian Elections 2026</h1>
+    <p class="subtitle">Select your preferred party and cast your vote</p>
+
+    <div class="grid">
+        <div class="party-card" onclick="selectParty(this, 'BJP', 'Bharatiya Janata Party')">
+            <div class="check-badge">✓</div>
+            <div class="party-logo" style="background:#f97316;">BJP</div>
+            <div class="party-abbr">BJP</div>
+            <div class="party-name">Bharatiya Janata Party</div>
+        </div>
+        <div class="party-card" onclick="selectParty(this, 'INC', 'Indian National Congress')">
+            <div class="check-badge">✓</div>
+            <div class="party-logo" style="background:#38bdf8;">INC</div>
+            <div class="party-abbr">INC</div>
+            <div class="party-name">Indian National Congress</div>
+        </div>
+        <div class="party-card" onclick="selectParty(this, 'AAP', 'Aam Aadmi Party')">
+            <div class="check-badge">✓</div>
+            <div class="party-logo" style="background:#1e3a8a;">AAP</div>
+            <div class="party-abbr">AAP</div>
+            <div class="party-name">Aam Aadmi Party</div>
+        </div>
+        <div class="party-card" onclick="selectParty(this, 'TMC', 'All India Trinamool Congress')">
+            <div class="check-badge">✓</div>
+            <div class="party-logo" style="background:#22c55e;">TMC</div>
+            <div class="party-abbr">TMC</div>
+            <div class="party-name">All India Trinamool Congress</div>
+        </div>
+        <div class="party-card" onclick="selectParty(this, 'DMK', 'Dravida Munnetra Kazhagam')">
+            <div class="check-badge">✓</div>
+            <div class="party-logo" style="background:#dc2626;">DMK</div>
+            <div class="party-abbr">DMK</div>
+            <div class="party-name">Dravida Munnetra Kazhagam</div>
+        </div>
+        <div class="party-card" onclick="selectParty(this, 'SP', 'Samajwadi Party')">
+            <div class="check-badge">✓</div>
+            <div class="party-logo" style="background:#ef4444;">SP</div>
+            <div class="party-abbr">SP</div>
+            <div class="party-name">Samajwadi Party</div>
+        </div>
+        <div class="party-card" onclick="selectParty(this, 'BSP', 'Bahujan Samaj Party')">
+            <div class="check-badge">✓</div>
+            <div class="party-logo" style="background:#2563eb;">BSP</div>
+            <div class="party-abbr">BSP</div>
+            <div class="party-name">Bahujan Samaj Party</div>
+        </div>
+        <div class="party-card" onclick="selectParty(this, 'CPI(M)', 'Communist Party of India (Marxist)')">
+            <div class="check-badge">✓</div>
+            <div class="party-logo" style="background:#dc2626; font-size:13px;">CPI(M)</div>
+            <div class="party-abbr">CPI(M)</div>
+            <div class="party-name">Communist Party of India (Marxist)</div>
+        </div>
+        <div class="party-card" onclick="selectParty(this, 'NCP', 'Nationalist Congress Party')">
+            <div class="check-badge">✓</div>
+            <div class="party-logo" style="background:#0d9488;">NCP</div>
+            <div class="party-abbr">NCP</div>
+            <div class="party-name">Nationalist Congress Party</div>
+        </div>
+        <div class="party-card" onclick="selectParty(this, 'Shiv Sena', 'Shiv Sena')">
+            <div class="check-badge">✓</div>
+            <div class="party-logo" style="background:#f97316; font-size:13px; line-height:1.3;">Shiv<br>Sena</div>
+            <div class="party-abbr">Shiv Sena</div>
+            <div class="party-name">Shiv Sena</div>
+        </div>
+        <div class="party-card" onclick="selectParty(this, 'NOTA', 'None of the Above')">
+            <div class="check-badge">✓</div>
+            <div class="party-logo" style="background:#6b7280;">NOTA</div>
+            <div class="party-abbr">NOTA</div>
+            <div class="party-name">None of the Above</div>
+        </div>
+    </div>
+
+    <div class="submit-wrap">
+        <button class="btn-submit" id="submitBtn" onclick="submitVote()" disabled style="display:inline-flex;align-items:center;gap:8px;"><img src="https://cdn-icons-png.flaticon.com/512/1379/1379376.png" style="width:20px;height:20px;opacity:0.5;" id="voteIcon" alt="vote"> Submit Vote</button>
+    </div>
+</div>
+
+<!-- CONFIRMATION -->
+<div id="confirmScreen">
+    <div class="success-icon"><img src="https://cdn-icons-png.flaticon.com/512/190/190411.png" style="width:56px;height:56px;" alt="success"></div>
+    <div class="confirm-title">Vote Submitted!</div>
+    <div class="confirm-sub">Thank you for participating in Indian Elections 2026</div>
+    <div class="voted-for-card">
+        <div class="voted-label">You voted for:</div>
+        <div class="voted-abbr" id="confirmedAbbr"></div>
+        <div class="voted-full" id="confirmedFull"></div>
+    </div>
+    <div class="receipt-box">
+        <div style="font-size:13px;color:#6b7280;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:5px;"><img src="https://cdn-icons-png.flaticon.com/512/2257/2257295.png" style="width:14px;height:14px;" alt="receipt"> Your Digital Receipt Number</div>
+        <div class="receipt-number" id="receiptDisplay">—</div>
+        <div class="receipt-note" style="display:flex;align-items:center;justify-content:center;gap:5px;"><img src="https://cdn-icons-png.flaticon.com/512/564/564619.png" style="width:13px;height:13px;" alt="warning"> Save this number now — it is valid for 24 hours only</div>
+    </div>
+    <div class="info-box">Your vote has been recorded securely and anonymously. Use your receipt number on the Results page to verify your vote.</div>
+    <div class="btn-row">
+        <button class="btn-receipt" id="viewReceiptBtn" onclick="" style="display:inline-flex;align-items:center;gap:8px;"><img src="https://cdn-icons-png.flaticon.com/512/2257/2257295.png" style="width:18px;height:18px;" alt="receipt"> View Receipt</button>
+        <a href="/results" class="btn-results" style="display:inline-flex;align-items:center;gap:8px;"><img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" style="width:18px;height:18px;" alt="results"> View Results</a>
+    </div>
+</div>
+
+{% endif %}
+
+<script>
+    let selectedCard = null, selectedAbbr = '', selectedFull = '';
+
+    function selectParty(card, abbr, fullName) {
+        if (selectedCard) selectedCard.classList.remove('selected');
+        card.classList.add('selected');
+        selectedCard = card;
+        selectedAbbr = abbr;
+        selectedFull = fullName;
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = false;
+        btn.classList.add('active');
+    }
+
+    async function submitVote() {
+        if (!selectedCard) return;
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Submitting...';
+
+        try {
+            const res = await fetch('/submit_vote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ party: selectedAbbr, party_full: selectedFull })
+            });
+            const result = await res.json();
+
+            if (result.status === 'ok') {
+                document.getElementById('confirmedAbbr').textContent = selectedAbbr;
+                document.getElementById('confirmedFull').textContent = selectedFull;
+                const rn = result.receipt_number || '';
+                document.getElementById('receiptDisplay').textContent = rn;
+                document.getElementById('viewReceiptBtn').onclick = () => {
+                    window.location.href = '/receipt/' + rn;
+                };
+                document.getElementById('votingScreen').style.display = 'none';
+                document.getElementById('confirmScreen').style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                alert(result.message || 'Error submitting vote.');
+                btn.disabled = false;
+                btn.textContent = 'Submit Vote';
+                btn.classList.add('active');
+            }
+        } catch (err) {
+            alert('Network error. Please try again.');
+            btn.disabled = false;
+            btn.textContent = 'Submit Vote';
+            btn.classList.add('active');
+        }
+    }
+</script>
+</body>
+</html>

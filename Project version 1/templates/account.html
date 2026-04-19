@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings - Online Voting</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #f9fafb; min-height: 100vh; padding: 32px 16px 80px; }
+
+        /* NAV */
+        .nav {
+            max-width: 860px; margin: 0 auto 36px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-brand { font-size: 18px; font-weight: 700; color: #111827; display: flex; align-items: center; gap: 8px; }
+        .nav-brand img { width: 22px; height: 22px; }
+        .nav-right { display: flex; align-items: center; gap: 12px; }
+        .nav-user { font-size: 14px; color: #6b7280; }
+        .nav-btn {
+            padding: 8px 16px; background: #f3f4f6; border: none;
+            border-radius: 8px; font-size: 14px; cursor: pointer;
+            color: #374151; font-family: 'Inter', sans-serif;
+            text-decoration: none; display: flex; align-items: center; gap: 6px;
+            transition: background 0.15s;
+        }
+        .nav-btn:hover { background: #e5e7eb; }
+        .nav-btn img { width: 16px; height: 16px; }
+
+        /* FLASH */
+        .flash { max-width: 860px; margin: 0 auto 24px; padding: 12px 16px; border-radius: 10px; font-size: 14px; }
+        .flash.success { background: #f0fdf4; border: 1px solid #86efac; color: #15803d; }
+        .flash.danger  { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
+        .flash.info    { background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; }
+
+        /* PAGE HEADER */
+        .page-header { max-width: 860px; margin: 0 auto 32px; }
+        .page-header h1 { font-size: 28px; font-weight: 700; color: #111827; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+        .page-header h1 img { width: 30px; height: 30px; }
+        .page-header p { font-size: 15px; color: #6b7280; }
+
+        /* VERIFY SCREEN */
+        .card {
+            max-width: 860px; margin: 0 auto; background: white;
+            border-radius: 20px; padding: 36px; box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+        }
+        .card-title { font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        .card-title img { width: 22px; height: 22px; }
+        .card-sub { font-size: 14px; color: #6b7280; margin-bottom: 28px; }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+        input, select {
+            width: 100%; padding: 11px 14px;
+            border: 1px solid #d1d5db; border-radius: 10px;
+            font-size: 15px; background: #fafbfc;
+            transition: border-color 0.2s; font-family: 'Inter', sans-serif;
+        }
+        input:focus, select:focus { outline: none; border-color: #4f46e5; background: white; box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+        input:disabled { background: #f3f4f6; color: #9ca3af; cursor: not-allowed; }
+
+        .btn {
+            padding: 12px 28px; border: none; border-radius: 12px;
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; font-family: 'Inter', sans-serif;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn img { width: 18px; height: 18px; }
+        .btn-primary { background: #4f46e5; color: white; }
+        .btn-primary:hover { background: #3730a3; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(79,70,229,0.3); }
+        .btn-success { background: #22c55e; color: white; }
+        .btn-success:hover { background: #16a34a; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(34,197,94,0.3); }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; transform: translateY(-1px); }
+        .btn-ghost { background: #f3f4f6; color: #374151; }
+        .btn-ghost:hover { background: #e5e7eb; }
+
+        /* SETTINGS GRID */
+        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        @media (max-width: 600px) { .settings-grid { grid-template-columns: 1fr; } }
+
+        .settings-section {
+            background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 14px; padding: 24px;
+        }
+        .section-title { font-size: 15px; font-weight: 700; color: #111827; margin-bottom: 4px; display: flex; align-items: center; gap: 7px; }
+        .section-title img { width: 18px; height: 18px; }
+        .section-desc { font-size: 13px; color: #9ca3af; margin-bottom: 18px; }
+
+        .current-value {
+            background: white; border: 1px solid #e5e7eb; border-radius: 8px;
+            padding: 10px 14px; margin-bottom: 14px;
+            font-size: 14px; color: #374151; display: flex; align-items: center; gap: 8px;
+        }
+        .current-value img { width: 16px; height: 16px; opacity: 0.5; }
+        .current-label { font-size: 11px; color: #9ca3af; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .divider { height: 1px; background: #e5e7eb; margin: 28px 0; }
+
+        .info-strip {
+            background: #fffbeb; border: 1px solid #fef08a; border-radius: 10px;
+            padding: 12px 16px; font-size: 13px; color: #92400e;
+            display: flex; align-items: flex-start; gap: 8px; margin-bottom: 24px;
+        }
+        .info-strip img { width: 16px; height: 16px; margin-top: 1px; flex-shrink: 0; }
+
+        .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+        .success-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #f0fdf4; border: 1px solid #86efac;
+            color: #15803d; font-size: 13px; font-weight: 600;
+            padding: 6px 14px; border-radius: 20px;
+        }
+        .success-badge img { width: 14px; height: 14px; }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="nav">
+    <div class="nav-brand">
+        <img src="https://cdn-icons-png.flaticon.com/512/3201/3201299.png" alt="vote">
+        Online Voting
+    </div>
+    <div class="nav-right">
+        <span class="nav-user">{{ user_name }}</span>
+        <a href="/dashboard" class="nav-btn">
+            <img src="https://cdn-icons-png.flaticon.com/512/1946/1946488.png" alt="dashboard">
+            Dashboard
+        </a>
+        <a href="/logout" class="nav-btn">
+            <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="logout">
+            Logout
+        </a>
+    </div>
+</div>
+
+<!-- FLASH MESSAGES -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+{% endwith %}
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <h1>
+        <img src="https://cdn-icons-png.flaticon.com/512/1077/1077063.png" alt="account">
+        Account Settings
+    </h1>
+    <p>Manage your personal information and preferences.</p>
+</div>
+
+{% if not verified %}
+<!-- ===================== VERIFICATION STEP ===================== -->
+<div class="card">
+    <div class="card-title">
+        <img src="https://cdn-icons-png.flaticon.com/512/2889/2889676.png" alt="verify">
+        Verify Your Identity
+    </div>
+    <div class="card-sub">For your security, please confirm your Aadhar number and password before making any changes.</div>
+
+    <div class="info-strip">
+        <img src="https://cdn-icons-png.flaticon.com/512/564/564619.png" alt="info">
+        This step ensures only you can edit your account details. Your information is encrypted and never shared.
+    </div>
+
+    <form method="POST" action="{{ url_for('account_verify') }}">
+        <div class="settings-grid">
+            <div class="form-group">
+                <label>Aadhar Number</label>
+                <input type="text" name="aadhar" placeholder="1234 5678 9012" maxlength="14" required autofocus>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="••••••••" required>
+            </div>
+        </div>
+        <div class="btn-row">
+            <button type="submit" class="btn btn-primary">
+                <img src="https://cdn-icons-png.flaticon.com/512/2889/2889676.png" alt="verify">
+                Verify & Continue
+            </button>
+            <a href="/dashboard" class="btn btn-ghost">
+                <img src="https://cdn-icons-png.flaticon.com/512/2223/2223615.png" alt="back">
+                Back to Dashboard
+            </a>
+        </div>
+    </form>
+</div>
+
+{% else %}
+<!-- ===================== SETTINGS FORM ===================== -->
+<div class="card">
+    <div class="card-title">
+        <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="edit">
+        Edit Your Details
+    </div>
+    <div class="card-sub">Fields below reflect your current registered information. Edit and save what you'd like to change.</div>
+
+    <div class="info-strip">
+        <img src="https://cdn-icons-png.flaticon.com/512/564/564619.png" alt="info">
+        <span><strong>Note:</strong> Changing your city or date of birth may affect your voting eligibility. Name and email changes are for contact purposes only.</span>
+    </div>
+
+    <form method="POST" action="{{ url_for('account_save') }}">
+
+        <div class="settings-grid">
+
+            <!-- Name -->
+            <div class="settings-section">
+                <div class="section-title">
+                    <img src="https://cdn-icons-png.flaticon.com/512/1077/1077114.png" alt="name">
+                    Full Name
+                </div>
+                <div class="section-desc">Your legal name as registered.</div>
+                <div class="current-label">Current</div>
+                <div class="current-value">
+                    <img src="https://cdn-icons-png.flaticon.com/512/1077/1077114.png" alt="name">
+                    {{ user_data.full_name }}
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <label>New Full Name</label>
+                    <input type="text" name="full_name" value="{{ user_data.full_name }}" placeholder="Your full name">
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="settings-section">
+                <div class="section-title">
+                    <img src="https://cdn-icons-png.flaticon.com/512/561/561127.png" alt="email">
+                    Email Address
+                </div>
+                <div class="section-desc">Used for notifications and contact.</div>
+                <div class="current-label">Current</div>
+                <div class="current-value">
+                    <img src="https://cdn-icons-png.flaticon.com/512/561/561127.png" alt="email">
+                    {{ user_data.email }}
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <label>New Email</label>
+                    <input type="email" name="email" value="{{ user_data.email }}" placeholder="you@example.com">
+                </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="settings-section">
+                <div class="section-title">
+                    <img src="https://cdn-icons-png.flaticon.com/512/455/455705.png" alt="phone">
+                    Phone Number
+                </div>
+                <div class="section-desc">Your registered contact number.</div>
+                <div class="current-label">Current</div>
+                <div class="current-value">
+                    <img src="https://cdn-icons-png.flaticon.com/512/455/455705.png" alt="phone">
+                    {{ user_data.phone_number or '—' }}
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <label>New Phone</label>
+                    <input type="tel" name="phone_number" value="{{ user_data.phone_number or '' }}" placeholder="+91 98765 43210">
+                </div>
+            </div>
+
+            <!-- Date of Birth -->
+            <div class="settings-section">
+                <div class="section-title">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2693/2693507.png" alt="birthday">
+                    Date of Birth
+                </div>
+                <div class="section-desc">Must be 18+ to remain eligible.</div>
+                <div class="current-label">Current</div>
+                <div class="current-value">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2693/2693507.png" alt="birthday">
+                    {{ user_data.date_of_birth or '—' }}
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <label>New Date of Birth</label>
+                    <input type="date" name="date_of_birth" value="{{ user_data.date_of_birth or '' }}">
+                </div>
+            </div>
+
+            <!-- City -->
+            <div class="settings-section">
+                <div class="section-title">
+                    <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" alt="city">
+                    City
+                </div>
+                <div class="section-desc">Your current city of residence.</div>
+                <div class="current-label">Current</div>
+                <div class="current-value">
+                    <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" alt="city">
+                    {{ user_data.city or '—' }}
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <label>New City</label>
+                    <input type="text" name="city" value="{{ user_data.city or '' }}" placeholder="Mumbai">
+                </div>
+            </div>
+
+            <!-- State -->
+            <div class="settings-section">
+                <div class="section-title">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3011/3011270.png" alt="state">
+                    State &amp; district
+                </div>
+                <div class="section-desc">Your state and district of residence.</div>
+                <div class="current-label">Current</div>
+                <div class="current-value">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3011/3011270.png" alt="state">
+                    {{ user_data.state or '—' }}, {{ user_data.district or 'India' }}
+                </div>
+                <div class="form-group">
+                    <label>State</label>
+                    <input type="text" name="state" value="{{ user_data.state or '' }}" placeholder="Maharashtra">
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <label>district</label>
+                    <input type="text" name="district" value="{{ user_data.district or 'India' }}" placeholder="India">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Password Change (optional) -->
+        <div class="card-title" style="margin-bottom:6px;">
+            <img src="https://cdn-icons-png.flaticon.com/512/3064/3064155.png" alt="password">
+            Change Password <span style="font-size:13px;font-weight:400;color:#9ca3af;margin-left:8px;">(optional — leave blank to keep current)</span>
+        </div>
+        <div class="settings-grid" style="margin-top:18px;">
+            <div class="form-group">
+                <label>New Password</label>
+                <input type="password" name="new_password" placeholder="Min. 6 characters">
+            </div>
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" name="confirm_password" placeholder="Repeat new password">
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <button type="submit" class="btn btn-success">
+                <img src="https://cdn-icons-png.flaticon.com/512/9426/9426944.png" alt="save">
+                Save Changes
+            </button>
+            <a href="/dashboard" class="btn btn-ghost">
+                <img src="https://cdn-icons-png.flaticon.com/512/2223/2223615.png" alt="cancel">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endif %}
+
+</body>
+</html>

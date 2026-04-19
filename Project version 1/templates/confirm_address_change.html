@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Address Change Confirmation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .card { max-width: 480px; width: 100%; background: white; border-radius: 20px; padding: 40px 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
+        .icon { font-size: 48px; text-align: center; margin-bottom: 16px; }
+        h1 { font-size: 24px; font-weight: 700; text-align: center; color: #111827; margin-bottom: 8px; }
+        .subtitle { font-size: 15px; color: #6b7280; text-align: center; margin-bottom: 28px; line-height: 1.5; }
+        .change-row { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 24px; }
+        .location-box { background: #f3f4f6; border-radius: 12px; padding: 14px 20px; text-align: center; flex: 1; }
+        .loc-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .loc-value { font-size: 16px; font-weight: 700; color: #111827; }
+        .arrow { font-size: 24px; color: #ef4444; flex-shrink: 0; }
+        .location-box.new { background: #f0fdf4; border: 2px solid #86efac; }
+        .warning-box { background: #fef2f2; border: 2px solid #fecaca; border-radius: 14px; padding: 18px 20px; margin-bottom: 24px; }
+        .warning-box h3 { font-size: 15px; font-weight: 700; color: #dc2626; margin-bottom: 8px; }
+        .warning-box ul { padding-left: 18px; }
+        .warning-box li { font-size: 14px; color: #7f1d1d; margin-bottom: 4px; line-height: 1.5; }
+        .btn-row { display: flex; gap: 12px; }
+        .btn { flex: 1; padding: 13px; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-gray { background: #f3f4f6; color: #374151; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+        .btn-gray:hover { background: #e5e7eb; }
+        .name-line { text-align: center; font-size: 14px; color: #6b7280; margin-bottom: 20px; }
+        .name-line strong { color: #111827; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="icon">📍</div>
+    <h1>Address Change Detected</h1>
+    <p class="subtitle">We found an existing account linked to this Aadhar number. Your location has changed.</p>
+
+    <p class="name-line">Voter: <strong>{{ name }}</strong></p>
+
+    <div class="change-row">
+        <div class="location-box">
+            <div class="loc-label">Previous Location</div>
+            <div class="loc-value">{{ old_city }}<br><small style="font-weight:500;color:#6b7280;">{{ old_district }}</small></div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="location-box new">
+            <div class="loc-label">New Location</div>
+            <div class="loc-value">{{ new_city }}<br><small style="font-weight:500;color:#15803d;">{{ new_district }}</small></div>
+        </div>
+    </div>
+
+    <div class="warning-box">
+        <h3 style="display:flex;align-items:center;gap:8px;"><img src="https://cdn-icons-png.flaticon.com/512/564/564619.png" style="width:18px;height:18px;" alt="warning"> The following will be permanently deleted:</h3>
+        <ul>
+            <li>Your previous voter registration in <strong>{{ old_city }}</strong></li>
+            <li>Any vote you cast in the previous area's elections</li>
+            <li>Your old vote receipt</li>
+        </ul>
+        <p style="margin-top:10px;font-size:13px;color:#7f1d1d;">You will be registered fresh for elections in <strong>{{ new_city }}</strong>. This cannot be undone.</p>
+    </div>
+
+    <div class="btn-row">
+        <form method="POST" action="{{ url_for('confirm_address_change') }}" style="flex:1;">
+            <button type="submit" class="btn btn-danger" style="width:100%;">
+                Yes, Move &amp; Re-register
+            </button>
+        </form>
+        <a href="{{ url_for('register') }}" class="btn btn-gray">Cancel</a>
+    </div>
+</div>
+</body>
+</html>
