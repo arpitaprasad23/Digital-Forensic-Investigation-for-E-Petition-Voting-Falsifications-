@@ -1,29 +1,3 @@
-# Project Setup Guide
-
-This project uses a **Virtual Environment (venv)**. This is not a library you "import," but a private folder that keeps the project's tools (like Flask and Bcrypt) separate from the rest of your computer.
-
-### 1. Create the Virtual Environment
-Open your terminal in this folder and run:
-*   **Windows:** `python -m venv venv`
-*   **Mac/Linux:** `python3 -m venv venv`
-
-### 2. Activate the Environment
-You must "enter" the environment so the computer knows to use the project's tools:
-*   **Windows (Command Prompt):** `venv\Scripts\activate`
-*   **Windows (PowerShell):** `.\venv\Scripts\activate`
-*   **Mac/Linux:** `source venv/bin/activate`
-
-*Note: You should see `(venv)` appear at the start of your command line.*
-
-### 3. Install Required Libraries
-Once the environment is active, run this command to install everything needed (Flask, Bcrypt, MySQL connector, and Cryptography):
-```bash
-pip install flask flask-bcrypt cryptography mysql-connector-python
-
-
-
-
-
 This project report details the development of a Digital Forensic Investigation framework for e-petition and e-voting systems, designed to ensure election integrity through proactive security and verifiable evidence trails.
 Developed by students at the Ramrao Adik Institute of Technology, the system addresses critical vulnerabilities in digital democracy, such as registration fraud, ballot stuffing, and administrative abuse.
 
@@ -41,3 +15,26 @@ Forensics “Forensically ready” design ensures that all electronic evidence c
 Immune Audit Logs: All actions from signing up to voting are tracked using exact timestamps and user identifiers.
 Forensic Analytics: Real-time statistics on city or district-based vote counts to detect suspicious activities.
 Receipt ID Verification: Vote receipts are delivered in ciphertext format to prove vote tallying while maintaining voter anonymity.
+
+Project Setup Guide
+
+This project uses a Virtual Environment (venv). This is not a library you "import," but a private folder that keeps the project's tools (like Flask and Bcrypt) separate from the rest of your computer.
+
+1. Create the Virtual Environment
+Open your terminal in this folder and run:
+Windows: `python -m venv venv`
+Mac/Linux: `python3 -m venv venv`
+
+2. Activate the Environment
+You must "enter" the environment so the computer knows to use the project's tools:
+Windows (Command Prompt): `venv\Scripts\activate`
+Windows (PowerShell): `.\venv\Scripts\activate`
+Mac/Linux: `source venv/bin/activate`
+
+Note: You should see `(venv)` appear at the start of your command line.
+
+3. Install Required Libraries 
+
+Once the environment is active, run this command to install everything needed (Flask, Bcrypt, MySQL connector, and Cryptography):
+```bash
+pip install flask flask-bcrypt cryptography mysql-connector-python
