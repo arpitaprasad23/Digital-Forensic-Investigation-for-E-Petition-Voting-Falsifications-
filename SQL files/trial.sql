@@ -1,0 +1,32 @@
+-- USE TEST_DB;
+-- SHOW DATABASES;
+-- SHOW TABLES;
+-- DROP DATABASE test_db;
+-- CREATE DATABASE test_db;
+-- USE test_db;
+-- ALTER TABLE ballot_records
+SELECT * FROM ADMIN_PROPOSALS;
+-- SELECT * FROM ADMIN_APPROVALS;
+-- SELECT * FROM ADMIN_LOGS;
+-- SELECT * FROM BALLOT_RECORDS
+-- SELECT * FROM vote_receipts;
+ -- SELECT * FROM voter_accounts;
+-- SELECT * FROM ADMIN_SNAPSHOTS;
+-- DESCRIBE vote_receipts;
+-- DESCRIBE voter_accounts;
+-- DESCRIBE BALLOT_RECORDS;
+-- UPDATE voter_accounts SET role = 'admin' WHERE email = 'your@email.com';
+
+-- SELECT * FROM VOTES
+-- USE test_db;
+-- ALTER TABLE ballot_records 
+-- ADD COLUMN IF NOT EXISTS voted_at DATETIME DEFAULT CURRENT_TIMESTAMP;
+--  USE test_db;
+-- ALTER TABLE ballot_records ADD COLUMN IF NOT EXISTS voted_at DATETIME DEFAULT CURRENT_TIMESTAMP;
+-- ADD COLUMN to ballot_records if voted_at is:
+-- ALTER TABLE ballot_records
+-- ADD COLUMN IF NOT EXISTS voted_at DATETIME;
+-- SET GLOBAL wait_timeout = 600;
+-- SET GLOBAL interactive_timeout = 600;
+-- SET GLOBAL net_read_timeout = 600;
+-- SET GLOBAL net_write_timeout = 600;
